@@ -25,44 +25,75 @@ def print_directory_tree(folder_path):
                 resize_image(end_path, file_name, item_path)
 
 
+def create_folder(subfolder_path):
+    try:
+        # Create the directory (and any missing parent directories)
+        os.makedirs(subfolder_path)
+    except OSError:
+        print(f"Failed to create the directory at {subfolder_path}.")
+
+    return subfolder_path
+
+
 def save_new_image(image, new_image_width, new_image_height, end_path, file_name):
     resized_image = image.resize((new_image_width, new_image_height), resample=Image.BICUBIC)
     resized_image.save(end_path + '/' + file_name, 'JPEG', quality=100)
 
 
-def facebook_instagram_resize(end_path, file_name, full_image_path):
+def facebook_resize(end_path, file_name, full_image_path):
     image = Image.open(full_image_path)
     image_width, image_height = image.size
+
     new_image_width = 1200
-    height_resize_ration = round(image_width/new_image_width, 2)
-    new_image_height = int(image_height/height_resize_ration)
+
+    height_resize_ratio = round(image_width/new_image_width, 2)
+    new_image_height = int(image_height/height_resize_ratio)
     # print(f'Facebook image size: {new_image_width}x{new_image_height}')
     subfolder_name = "Facebook"
     # Construct the path of the subfolder
     subfolder_path = os.path.join(end_path, subfolder_name)
     # Check if the subfolder exists
     if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
-        # print("xxxxxxxxxx  The subfolder exists! xxxxxxxxxx")
+        end_path = subfolder_path
+    else:
+        end_path = create_folder(subfolder_path)
+
+    save_new_image(image, new_image_width, new_image_height, end_path, file_name)
+    image.close()
+
+
+def instagram_resize(end_path, file_name, full_image_path):
+    image = Image.open(full_image_path)
+    image_width, image_height = image.size
+    new_image_size = 1080
+    subfolder_name = "Instagram"
+    # Construct the path of the subfolder
+    subfolder_path = os.path.join(end_path, subfolder_name)
+
+    if image_width > image_height:
+        width_resize_ratio = round(image_height/new_image_size, 2)
+        new_image_width = int(image_width/width_resize_ratio)
+        new_image_height = new_image_size
+    else:
+        height_resize_ratio = round(image_width/new_image_size, 2)
+        new_image_height = int(image_height/height_resize_ratio)
+        new_image_width = new_image_size
+
+    # Check if the subfolder exists
+    if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
         end_path = subfolder_path
         save_new_image(image, new_image_width, new_image_height, end_path, file_name)
     else:
         try:
             # Create the directory (and any missing parent directories)
-            os.makedirs(subfolder_path)
-            # print("The directory was created successfully!")
+            create_folder(subfolder_path)
         except OSError:
             print(f"Failed to create the directory at {subfolder_path}.")
-            # print("************ Create Facebook folder ************.")
         else:
             end_path = subfolder_path
             save_new_image(image, new_image_width, new_image_height, end_path, file_name)
 
     image.close()
-    print('New Facebook image saved')
-
-
-def instagram_resize(end_path, file_name, full_image_path):
-    pass
 
 
 def twitter_resize(end_path, file_name, full_image_path):
@@ -113,10 +144,17 @@ def resize_image(end_path, file_name, full_image_path):
         # image_width_test, image_height_test = image.size
         # print(f'new image size: {image_width_test}x{image_height_test}')
         image.close()
+
         # Resize the image for Facebook
+        print('Starts saving Facebook images')
         facebook_resize(end_path, file_name, full_image_path)
+        print('End saving Facebook images')
+
         # Resize the image for Instagram
-        # instagram_resize(end_path, file_name, full_image_path)
+        print('Starts saving Instagram images')
+        instagram_resize(end_path, file_name, full_image_path)
+        print('End saving Instagram images')
+
         # Resize the image for Twitter
         # twitter_resize(end_path, file_name, full_image_path)
         # Resize the image for Pinterest
