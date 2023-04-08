@@ -131,3 +131,6 @@ dmypy.json
 
 # directories
 assets/
+
+# files
+.DS_Store
