@@ -40,35 +40,7 @@ def save_new_image(image, new_image_width, new_image_height, end_path, file_name
     resized_image.save(end_path + '/' + file_name, 'JPEG', quality=100)
 
 
-def facebook_resize(end_path, file_name, full_image_path):
-    image = Image.open(full_image_path)
-    image_width, image_height = image.size
-
-    new_image_width = 1200
-
-    height_resize_ratio = round(image_width/new_image_width, 2)
-    new_image_height = int(image_height/height_resize_ratio)
-    # print(f'Facebook image size: {new_image_width}x{new_image_height}')
-    subfolder_name = "Facebook"
-    # Construct the path of the subfolder
-    subfolder_path = os.path.join(end_path, subfolder_name)
-    # Check if the subfolder exists
-    if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
-        end_path = subfolder_path
-    else:
-        end_path = create_folder(subfolder_path)
-
-    save_new_image(image, new_image_width, new_image_height, end_path, file_name)
-    image.close()
-
-
-def instagram_resize(end_path, file_name, full_image_path):
-    image = Image.open(full_image_path)
-    image_width, image_height = image.size
-    new_image_size = 1080
-    subfolder_name = "Instagram"
-    # Construct the path of the subfolder
-    subfolder_path = os.path.join(end_path, subfolder_name)
+def square_and_vertical_image_dimensions(image_width, image_height, new_image_size):
 
     if image_width > image_height:
         width_resize_ratio = round(image_height/new_image_size, 2)
@@ -79,29 +51,121 @@ def instagram_resize(end_path, file_name, full_image_path):
         new_image_height = int(image_height/height_resize_ratio)
         new_image_width = new_image_size
 
-    # Check if the subfolder exists
-    if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
-        end_path = subfolder_path
-        save_new_image(image, new_image_width, new_image_height, end_path, file_name)
-    else:
-        try:
-            # Create the directory (and any missing parent directories)
-            create_folder(subfolder_path)
-        except OSError:
-            print(f"Failed to create the directory at {subfolder_path}.")
-        else:
-            end_path = subfolder_path
-            save_new_image(image, new_image_width, new_image_height, end_path, file_name)
+    return new_image_width, new_image_height
+
+
+def horizontal_image_resize(end_path, file_name, full_image_path):
+
+    image = Image.open(full_image_path)
+    image_width, image_height = image.size
+
+    new_image_width = 0
+    new_image_height = 0
+    tmp_end_path = end_path
+
+    subfolder_names = ('Twitter_1600x900', 'Facebook_1200x630')
+    for subfolder_name in subfolder_names:
+
+        if subfolder_name == 'Twitter_1600x900':
+
+            subfolder_path = os.path.join(tmp_end_path, subfolder_name)
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_width = 1600
+            height_resize_ratio = round(image_width/new_image_width, 2)
+            new_image_height = int(image_height/height_resize_ratio)
+        elif subfolder_name == 'Facebook_1200x630':
+
+            subfolder_path = os.path.join(tmp_end_path, subfolder_name)
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_width = 1200
+            height_resize_ratio = round(image_width/new_image_width, 2)
+            new_image_height = int(image_height/height_resize_ratio)
+
+        if new_image_width != 0 and new_image_height != 0:
+            save_new_image(image, new_image_width, new_image_height, tmp_end_path, file_name)
+
+        tmp_end_path = end_path
 
     image.close()
 
 
-def twitter_resize(end_path, file_name, full_image_path):
-    pass
+def square_and_vertical_image_resize(end_path, file_name, full_image_path):
 
+    image = Image.open(full_image_path)
+    image_width, image_height = image.size
+    new_image_width = 0
+    new_image_height = 0
 
-def pinterest_resize(end_path, file_name, full_image_path):
-    pass
+    tmp_end_path = end_path
+
+    subfolder_names = ('Instagram_1080x1080', 'Facebook_1200x1200', 'Pinterest_1000x1000', 'Pinterest_1000x1500', 'Twitter_800x800')
+    for subfolder_name in subfolder_names:
+        subfolder_path = os.path.join(tmp_end_path, subfolder_name)
+
+        if subfolder_name == 'Instagram_1080x1080':
+
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_size = 1080
+            new_image_width, new_image_height = square_and_vertical_image_dimensions(image_width, image_height, new_image_size)
+
+        elif subfolder_name == 'Facebook_1200x1200':
+
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_size = 1200
+            new_image_width, new_image_height = square_and_vertical_image_dimensions(image_width, image_height, new_image_size)
+
+        elif subfolder_name == 'Pinterest_1000x1000':
+
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_size = 1000
+            new_image_width, new_image_height = square_and_vertical_image_dimensions(image_width, image_height, new_image_size)
+
+        elif subfolder_name == 'Pinterest_1000x1500':
+
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_size = 1500
+            new_image_width, new_image_height = square_and_vertical_image_dimensions(image_width, image_height, new_image_size)
+
+        elif subfolder_name == 'Twitter_800x800':
+
+            if os.path.exists(subfolder_path) and os.path.isdir(subfolder_path):
+                tmp_end_path = subfolder_path
+            else:
+                tmp_end_path = create_folder(subfolder_path)
+
+            new_image_size = 800
+            new_image_width, new_image_height = square_and_vertical_image_dimensions(image_width, image_height, new_image_size)
+
+        if new_image_width != 0 and new_image_height != 0:
+            save_new_image(image, new_image_width, new_image_height, tmp_end_path, file_name)
+
+        tmp_end_path = end_path
+
+    image.close()
 
 
 def resize_image(end_path, file_name, full_image_path):
@@ -112,7 +176,6 @@ def resize_image(end_path, file_name, full_image_path):
     # print("Directory path:", end_path)
     # print("File name:", file_name)
     if file_extension in image_extensions:
-        # print("File extension:", file_extension)
         # Open the image
         image = Image.open(full_image_path)
         # Get the image width and height
@@ -123,7 +186,6 @@ def resize_image(end_path, file_name, full_image_path):
 
         # Print the estimated resolution
         if current_resolution is not None:
-            # print(f'original image resolution: {current_resolution} dpi')
             if current_resolution > 72:
                 new_resolution = 72
                 # Calculate the new size of the image in pixels
@@ -135,30 +197,22 @@ def resize_image(end_path, file_name, full_image_path):
                 image = resized_image
 
         if file_extension not in ('.jpg', '.jpeg'):
-            # print('================= converting to JPEG =================')
             # Save the image as a JPEG
             image.save(end_path + '/' + file_name, 'JPEG', quality=100)
         else:
             image.save(full_image_path, 'JPEG', quality=100)
 
-        # image_width_test, image_height_test = image.size
-        # print(f'new image size: {image_width_test}x{image_height_test}')
         image.close()
 
         # Resize the image for Facebook
-        print('Starts saving Facebook images')
-        facebook_resize(end_path, file_name, full_image_path)
-        print('End saving Facebook images')
+        print('Starts saving horizontal images')
+        horizontal_image_resize(end_path, file_name, full_image_path)
+        print('End saving horizontal images')
 
         # Resize the image for Instagram
-        print('Starts saving Instagram images')
-        instagram_resize(end_path, file_name, full_image_path)
-        print('End saving Instagram images')
-
-        # Resize the image for Twitter
-        # twitter_resize(end_path, file_name, full_image_path)
-        # Resize the image for Pinterest
-        # pinterest_resize(end_path, file_name, full_image_path)
+        print('Starts saving square and vertical images')
+        square_and_vertical_image_resize(end_path, file_name, full_image_path)
+        print('End saving square and vertical images')
 
 
 print_directory_tree(path)
